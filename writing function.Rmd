@@ -1,0 +1,152 @@
+---
+title: "Writing functions"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(rvest)
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+## Do something simple
+
+```{r}
+x_vec = rnorm(30, mean = 5, sd = 3)
+(x_vec - mean(x_vec)) / sd(x_vec)
+```
+
+I want a function to compute z-scores
+
+```{r}
+z_scores = function(x) {
+  
+  if (!is.numeric(x)) {
+    stop("Input must be numeric")
+  }
+  
+  if (length(x) < 3) {
+    stop("Input must have at least three numbers")
+  }
+  
+  z = (x - mean(x)) / sd(x)
+  
+  return(z)
+  
+}
+z_scores(x_vec)
+```
+
+Try my function on some other things. These should give errors.
+
+```{r, error = TRUE}
+z_scores(3) #
+z_scores("my name is jeff")#cannot be a character
+z_scores(mtcars)
+z_scores(c(TRUE, TRUE, FALSE, TRUE))
+```
+
+## Multiple outputs
+two things need to return, so we do not use return() but tibble/list
+```{r}
+mean_and_sd = function(x) {
+  
+  if (!is.numeric(x)) {
+    stop("Input must be numeric")
+  }
+  
+  if (length(x) < 3) {
+    stop("Input must have at least three numbers")
+  }
+  
+  mean_x = mean(x)
+  sd_x = sd(x)
+  
+  tibble(
+    mean = mean_x,
+    sd = sd_x
+  )
+}
+```
+
+Check that the function works.
+
+```{r}
+x_vec = rnorm(100, mean = 3, sd = 4)
+mean_and_sd(x_vec)
+```
+
+## Multiple inputs
+
+**usuall way** 
+
+```{r}
+sim_data =
+  tibble(
+    x = rnorm(100, mean = 6, sd = 3)
+  )
+
+sim_data %>% 
+  summarize(
+    mean = mean(x),
+    sd = sd(x)
+  )
+```
+
+**I'd like to do this with a function. **
+use mu but not mean because we use true mean
+sim_mean_sd = function(n, mean,sd)
+the imput mu will bw drop into mean = mean(x)
+run this function, each time you will get different mean and sd
+
+```{r}
+sim_mean_sd = function(sample_size, mu,sigma){
+  
+  sim_data =
+  tibble(
+    x = rnorm(sample_size, mean = mu, sd = sigma)
+  )
+  
+  sim_data %>% 
+    summarize(
+      mean = mean(x),
+      sd = sd(x)
+    )
+}
+
+sim_mean_sd(100,6,3)#can not shif name
+sim_mean_sd(samp_size = 100, mu = 6, sigma = 3)#recomand use name to match in function
+sim_mean_sd(mu = 6, samp_size = 100, sigma = 3)#can shif things with name defined
+sim_mean_sd(samp_size = 100)
+```
+
+when the defult is defined
+```{r}
+sim_mean_sd = function(sample_size = 100, mu = 3,sigma =3){
+  
+  sim_data =
+  tibble(
+    x = rnorm(sample_size, mean = mu, sd = sigma)
+  )
+  
+  sim_data %>% 
+    summarize(
+      mean = mean(x),
+      sd = sd(x)
+    )
+}
+sim_mean_sd(100,6,3)#replace the defult with our prefer
+```
+
