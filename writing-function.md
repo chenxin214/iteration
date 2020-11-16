@@ -8,11 +8,11 @@ x_vec = rnorm(30, mean = 5, sd = 3)
 (x_vec - mean(x_vec)) / sd(x_vec)
 ```
 
-    ##  [1] -0.4182537  1.2381032  1.5670918 -0.5988195 -1.9419116 -0.5190990
-    ##  [7] -0.3889982 -0.4024085 -0.3601213  0.1555636  1.5595173 -0.9556157
-    ## [13] -0.1829264  0.6099766  2.2366831 -0.4810322  1.1439798 -0.4625779
-    ## [19]  0.5898312 -0.9859304 -0.5748583 -0.4700404 -1.1281597  0.2957120
-    ## [25]  0.3794324  0.9241753  0.5348715  0.8626142 -0.1851187 -2.0416806
+    ##  [1] -1.12110577 -0.91934111 -0.81019385 -0.98190727  0.35495586 -0.08792861
+    ##  [7]  1.41705544  0.37242216  0.80426391  1.49785597 -0.86919083  0.68381547
+    ## [13]  0.31197964  0.77351255 -0.31558242 -1.31758245  0.87957952  0.69755915
+    ## [19]  1.45962004  0.12524110  0.48014735 -0.22538704 -0.93345336 -0.75707545
+    ## [25] -0.83443251 -0.19759322  0.43610327  0.28401834  1.57403174 -2.78138763
 
 I want a function to compute z-scores
 
@@ -35,11 +35,11 @@ z_scores = function(x) {
 z_scores(x_vec)
 ```
 
-    ##  [1] -0.4182537  1.2381032  1.5670918 -0.5988195 -1.9419116 -0.5190990
-    ##  [7] -0.3889982 -0.4024085 -0.3601213  0.1555636  1.5595173 -0.9556157
-    ## [13] -0.1829264  0.6099766  2.2366831 -0.4810322  1.1439798 -0.4625779
-    ## [19]  0.5898312 -0.9859304 -0.5748583 -0.4700404 -1.1281597  0.2957120
-    ## [25]  0.3794324  0.9241753  0.5348715  0.8626142 -0.1851187 -2.0416806
+    ##  [1] -1.12110577 -0.91934111 -0.81019385 -0.98190727  0.35495586 -0.08792861
+    ##  [7]  1.41705544  0.37242216  0.80426391  1.49785597 -0.86919083  0.68381547
+    ## [13]  0.31197964  0.77351255 -0.31558242 -1.31758245  0.87957952  0.69755915
+    ## [19]  1.45962004  0.12524110  0.48014735 -0.22538704 -0.93345336 -0.75707545
+    ## [25] -0.83443251 -0.19759322  0.43610327  0.28401834  1.57403174 -2.78138763
 
 Try my function on some other things. These should give errors.
 
@@ -102,7 +102,7 @@ mean_and_sd(x_vec)
     ## # A tibble: 1 x 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  2.08  4.31
+    ## 1  3.19  3.80
 
 ## Multiple inputs
 
@@ -124,7 +124,7 @@ sim_data %>%
     ## # A tibble: 1 x 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  6.62  3.06
+    ## 1  5.77  2.89
 
 **I’d like to do this with a function. ** use mu but not mean because we
 use true mean sim\_mean\_sd = function(n, mean,sd) the imput mu will bw
@@ -152,7 +152,7 @@ sim_mean_sd(100,6,3)#can not shif name
     ## # A tibble: 1 x 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  6.02  2.89
+    ## 1  5.87  2.89
 
 ``` r
 sim_mean_sd(samp_size = 100, mu = 6, sigma = 3)#recomand use name to match in function
@@ -161,7 +161,7 @@ sim_mean_sd(samp_size = 100, mu = 6, sigma = 3)#recomand use name to match in fu
     ## # A tibble: 1 x 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  5.63  3.00
+    ## 1  6.23  2.71
 
 ``` r
 sim_mean_sd(mu = 6, samp_size = 100, sigma = 3)#can shif things with name defined
@@ -170,7 +170,7 @@ sim_mean_sd(mu = 6, samp_size = 100, sigma = 3)#can shif things with name define
     ## # A tibble: 1 x 2
     ##    mean    sd
     ##   <dbl> <dbl>
-    ## 1  5.82  2.94
+    ## 1  6.20  3.18
 
 when the defult value is defined: sim\_mean\_sd\_d =
 function(samp\_size, mu = 3,sigma = 4) you can replace the defult with
@@ -257,24 +257,24 @@ read_page_reviews(dynamite_url)
 ```
 
     ## # A tibble: 10 x 3
-    ##    title                             stars      text                            
-    ##    <chr>                             <chr>      <chr>                           
-    ##  1 "Boo"                             1.0 out o~ "We rented this movie because o~
-    ##  2 "Movie is still silly fun....ama~ 1.0 out o~ "We are getting really frustrat~
-    ##  3 "Brilliant and awkwardly funny."  5.0 out o~ "I've watched this movie repeat~
-    ##  4 "Great purchase price for great ~ 5.0 out o~ "Great movie and real good digi~
-    ##  5 "Movie for memories"              5.0 out o~ "I've been looking for this mov~
-    ##  6 "Love!"                           5.0 out o~ "Love this movie. Great quality"
-    ##  7 "Hilarious!"                      5.0 out o~ "Such a funny movie, definitely~
-    ##  8 "napoleon dynamite"               5.0 out o~ "cool movie"                    
-    ##  9 "Top 5"                           5.0 out o~ "Best MOVIE ever! Funny one lin~
-    ## 10 "\U0001f44d"                      5.0 out o~ "Exactly as described and came ~
+    ##    title                            stars      text                             
+    ##    <chr>                            <chr>      <chr>                            
+    ##  1 Entertaining, limited quality    4.0 out o~ "Entertainment level gets a 5 st~
+    ##  2 Boo                              1.0 out o~ "We rented this movie because ou~
+    ##  3 Movie is still silly fun....ama~ 1.0 out o~ "We are getting really frustrate~
+    ##  4 Brilliant and awkwardly funny.   5.0 out o~ "I've watched this movie repeate~
+    ##  5 Great purchase price for great ~ 5.0 out o~ "Great movie and real good digit~
+    ##  6 Movie for memories               5.0 out o~ "I've been looking for this movi~
+    ##  7 Love!                            5.0 out o~ "Love this movie. Great quality" 
+    ##  8 Hilarious!                       5.0 out o~ "Such a funny movie, definitely ~
+    ##  9 napoleon dynamite                5.0 out o~ "cool movie"                     
+    ## 10 Top 5                            5.0 out o~ "Best MOVIE ever! Funny one line~
 
 **Let’s read a few pages of reviews**
 
 ``` r
 dynamite_url_base = "https://www.amazon.com/product-reviews/B00005JNBQ/ref=cm_cr_arp_d_viewopt_rvwer?ie=UTF8&reviewerType=avp_only_reviews&sortBy=recent&pageNumber=" #get a url base the number is not specified
-dynamite_urls = str_c(dynamite_url_base, 1:5) #combine url base with number 1-5
+dynamite_urls = str_c(dynamite_url_base, 1:20) #combine url base with number 1-5
 
 all_reviews = 
   bind_rows(
@@ -288,13 +288,49 @@ all_reviews =
 
 ## Mean scoping example
 
-f = function(x) { z = x + y z } x = 1 y = 2 f(x = y)
+``` r
+f = function(x) {
+  z = x + y
+  z
+}
+x = 1
+y = 2
+f(x = y)#the input x=2, so the result will be altually 4
+```
+
+    ## [1] 4
 
 ## Functions as arguments
 
-my\_summary = function(x, summ\_func) {
+my\_summary is a function, pass in two argument’x’ and ‘summ\_fuc’ get a
+function and pass in a vector’summ\_func’
 
-summ\_func(x)
+``` r
+my_summary = function(x, summ_func) {
+  
+  summ_func(x)
+  
+}
+x_vec = rnorm(100, 3, 7)
+mean(x_vec)
+```
 
-} x\_vec = rnorm(100, 3, 7) mean(x\_vec) median(x\_vec)
-my\_summary(x\_vec, IQR)
+    ## [1] 3.290138
+
+``` r
+median(x_vec)
+```
+
+    ## [1] 3.439474
+
+``` r
+IQR(x_vec)
+```
+
+    ## [1] 9.540965
+
+``` r
+my_summary(x_vec, mean)
+```
+
+    ## [1] 3.290138
