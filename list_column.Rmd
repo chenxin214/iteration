@@ -1,0 +1,198 @@
+---
+title: "list column"
+author: "Chenxin Zhang"
+date: "11/16/2020"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(rvest)
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+## Lists
+
+You can put anything in a list. 
+an numeric vector
+a logical vector 
+matrix
+
+```{r}
+l = list(
+  vec_numeric = 5:8,
+  vec_logical = c(TRUE, TRUE, FALSE, TRUE, FALSE, FALSE),
+  mat = matrix(1:8, nrow = 2, ncol = 4),
+  summary = summary(rnorm(100))
+)
+```
+
+```{r}
+l
+l$vec_numeric
+l[[1]] #give me the first list element
+l[["vec_numeric"]]
+mean(l[["vec_numeric"]])
+```
+
+## `for` loop
+
+Create a new list.
+abcd is input id name
+```{r}
+list_norm = 
+  list(
+    a = rnorm(20, mean = 3, sd = 1),
+    b = rnorm(30, mean = 0, sd = 5),
+    c = rnorm(40, mean = 10, sd = .2),
+    d = rnorm(20, mean = -3, sd = 1)
+  )
+
+list_norm$a
+list_norm[[1]]
+list_norm[["a"]]
+```
+
+function.
+
+```{r}
+mean_and_sd = function(x) {
+  
+  if (!is.numeric(x)) {
+    stop("Input must be numeric")
+  }
+  
+  if (length(x) < 3) {
+    stop("Input must have at least three numbers")
+  }
+  
+  mean_x = mean(x)
+  sd_x = sd(x)
+  
+  tibble(
+    mean = mean_x,
+    sd = sd_x
+  )
+  
+}
+```
+
+**apply that function to each list element**
+
+```{r}
+mean_and_sd(list_norm[[1]])
+mean_and_sd(list_norm[[2]])
+mean_and_sd(list_norm[[3]])
+mean_and_sd(list_norm[[4]])
+```
+
+**for loop**
+
+```{r}
+output = vector("list", length = 4)
+for (i in 1:4) {
+  
+  output[[i]] = mean_and_sd(list_norm[[i]])
+}
+```
+
+**map**
+given all element in a list to a function
+
+map():result is still a list
+```{r}
+output = map(list_norm, mean_and_sd)
+output = map(list_norm, median)#a different function:IQR,
+```
+
+map_dbl(): result show up as numbers rather than as lists
+```{r}
+output = map_dbl(list_norm, median)
+output = map_dbl(list_norm, median, .id = "input")#no different from above, so we do not need a id = input in map_dbl
+```
+
+map_df(): result is not a list of data frame but a combined data frame
+```{r}
+#output = map_dbl(list_norm, mean_and_sd) is not correct, result must be a  single double, not a vector of class
+output = map_df(list_norm, mean_and_sd)
+output = map_df(list_norm, mean_and_sd, .id = "input")
+#each output of mean and sd is a tibble
+#put list name(abcd) from list_norm into a column named input
+```
+
+**List columns**
+
+creat a data frame that has a list column in it
+
+```{r}
+# put abcd in a column called 'name'
+#'samp' column is the list of samples generated previously
+#first row in 'name' has a and the first row in 'samp' has that first element of list_norm(it's a vector of class double of length 20)
+#a more compact way of looking things
+listcol_df = 
+  tibble(
+    name = c("a", "b", "c", "d"),
+    samp = list_norm
+  )
+```
+
+pull element in data frame
+```{r}
+listcol_df %>% pull(name)#get the first column by pull()
+listcol_df %>% pull(samp)#get the second column by pull(), the list
+listcol_df$samp[[1]]#get the first element of the list
+listcol_df %>% 
+  filter(name == "a")#get the first row of the data frame as a tibble 
+```
+
+some operations: dataframe-map, function
+
+```{r}
+#get the first element in the list
+listcol_df$samp[[1]]
+# put the first element into a function
+mean_and_sd(listcol_df$samp[[1]])
+# put the first element into a function
+mean_and_sd(list_norm[[1]])
+
+
+#map accross 'samp' column as an input list by mean_and_sd function
+map(listcol_df$samp, mean_and_sd)
+map(list_norm, mean_and_sd)
+```
+
+**add a list column**
+
+```{r}
+#map_df() result as data frame
+#map() result as list
+listcol_df1 = 
+  listcol_df %>% 
+  mutate(summary = map_df(samp, mean_and_sd),
+         medians = map(samp, median))
+```
+
+```{r}
+#apply this function to each element of the list and save that output in the same data frame
+#mutate function working inside the listcol_df, so we do not need listcol_df$samp
+#creat a 'summary' column by map mean_and_sd across the 'samp' column in this data set
+#
+listcol_df2 = 
+  listcol_df %>% 
+  mutate(
+    summary = map(samp, mean_and_sd),#result as list
+    medians = map_dbl(samp, median))# result as single number
+```
+
