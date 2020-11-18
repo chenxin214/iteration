@@ -1,0 +1,225 @@
+---
+title: "simulation"
+author: "Chenxin Zhang"
+date: "11/17/2020"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(rvest)
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+set.seed(1)#for reproducibility, make our sample start in the same point over and over
+```
+
+
+simulation is do repeated sampling which cannot do in really life
+
+# Let's simulate something
+
+creat a normal distribution data 
+
+```{r}
+sim_data = 
+    tibble(
+      x = rnorm(n = 100, mean = 2, sd = 3)
+    )
+```
+
+summarize mean and sd
+
+```{r}
+sim_data %>% 
+    summarize(
+      mean = mean(x),
+      sd = sd(x)
+    )
+```
+
+Creat a function.
+
+```{r}
+sim_mean_sd = function(samp_size, mu = 3, sigma = 4) {
+  
+  sim_data = 
+    tibble(
+      x = rnorm(n = samp_size, mean = mu, sd = sigma)
+    )#generate data from a normal distribution
+  sim_data %>% 
+    summarize(
+      mean = mean(x),
+      sd = sd(x)
+    )
+  
+}
+```
+
+I can "simulate" by running this line. 
+
+```{r}
+sim_mean_sd(30)
+```
+
+
+## Let's simulate a lot
+
+**for loop**
+
+```{r}
+output = vector("list", length = 100)#vector of type list
+for (i in 1:100) {
+  
+  output[[i]] = sim_mean_sd(samp_size = 30)
+  
+}
+bind_rows(output)#not a list but data frame
+```
+
+Let's use a loop function.
+similar to for loop
+```{r}
+# rerun the function 100 times
+sim_results = 
+  rerun(100, sim_mean_sd(samp_size = 30)) %>% 
+  bind_rows()
+```
+
+Let's look at results...
+
+
+```{r}
+sim_results %>% 
+  ggplot(aes(x = mean)) + geom_density()
+sim_results %>% 
+  summarize(
+    avg_samp_mean = mean(mean),
+    sd_samp_mean = sd(mean)
+  )
+sim_results %>% 
+  ggplot(aes(x = sd)) + geom_density()
+```
+
+## Let's try other sample sizes.
+
+when n=30 run simulation code 100 times
+```{r}
+n_list = 
+  list(
+    "n = 30" = 30,
+    "n = 60" = 60,
+    "n = 120" = 120,
+    "n = 240" = 240
+  )
+
+output = vector("list", length = 4)
+output[[1]] = rerun(100, sim_mean_sd(samp_size = n_list[[1]])) %>% bind_rows()#compute only one time, so we use for loop to simulate many times
+
+
+for (i in 1:4) {
+  output[[i]] = 
+    rerun(100, sim_mean_sd(samp_size = n_list[[i]])) %>% 
+    bind_rows()
+}#finally get 4 list
+```
+
+
+```{r}
+# make a tibble and use mutate to add the result as new column
+# maping  sample_size across return(), get a list column
+# .x means that the first argument to map is .x; tidle means put the .x to the function; whatever the first sample size is , it is going to get plugged in over the function
+sim_results = 
+  tibble(
+    sample_size = c(30, 60, 120, 240)
+  ) %>% 
+  mutate(
+    output_lists = map(.x = sample_size, ~ rerun(100, sim_mean_sd(.x))))
+```
+
+```{r}
+#pull the list from column
+#in the result : [[1]] means the first element in the output lists is a list, [[1]][[2]]] means the second piece in that list is a tibble
+sim_results %>% 
+  pull(output_lists)
+```
+
+
+
+```{r}
+# there are 10 lists in the first list, so we combine the 10 list to a tibble
+sim_results  %>% 
+  mutate(
+  estimate_df = map(output_lists, bind_rows)
+  ) %>% 
+  pull(estimate_df)
+```
+
+unnest a data frame
+```{r}
+sim_results = sim_results  %>% 
+  mutate(
+  estimate_df = map(output_lists, bind_rows)
+  ) %>% 
+  select(-output_lists) %>% 
+  unnest(estimate_df)
+```
+
+Do some data frame things.
+
+warning: Continuous x aesthetic in x axis
+```{r}
+plot1 = sim_results %>% 
+  ggplot(aes(x = sample_size, y = mean)) + 
+  geom_boxplot()
+```
+
+creat an actually informative lable in x axis
+```{r}
+# overwrite string in sample_size column that is equal to the combination of 'n = ' and the original sample_size
+# reorder wahtever in sample size column
+plot2 = 
+  sim_results %>% 
+    mutate(
+    sample_size = str_c("n = ", sample_size),
+    sample_size = fct_inorder(sample_size)) %>% 
+  ggplot(aes(x = sample_size, y = mean)) + 
+  geom_boxplot()
+```
+
+violin plot
+```{r}
+# get a symmetric distribution, when you turn your head to the side each of those looks kind of like a normal distribution
+plot3 = 
+  sim_results %>% 
+    mutate(
+    sample_size = str_c("n = ", sample_size),
+    sample_size = fct_inorder(sample_size)) %>% 
+  ggplot(aes(x = sample_size, y = mean)) + 
+  geom_violin()
+```
+
+
+```{r}
+# if you run ten thousand times it should get closer
+sim_results %>% 
+  group_by(sample_size) %>% 
+  summarize(
+    avg_samp_mean = mean(mean),
+    sd_samp_mean = sd(mean)
+  )
+```
+
+
+
+
